@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hamper Run – Christmas drop-off route planner</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#eef3f0;--panel:#fff;--ink:#14261f;--mute:#5b6f66;--line:#d3ddd7;--pine:#14573f;--berry:#b3263e;--gold:#d99a12;--water:#cfe3ee;--land:#dfe9e2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1815;--panel:#16231f;--ink:#e6efe9;--mute:#92a69b;--line:#2a3b34;--pine:#4fbf8f;--berry:#ff6f86;--gold:#f0b83a;--water:#1b3441;--land:#1d2c26}}
+:root[data-theme="dark"]{--bg:#0e1815;--panel:#16231f;--ink:#e6efe9;--mute:#92a69b;--line:#2a3b34;--pine:#4fbf8f;--berry:#ff6f86;--gold:#f0b83a;--water:#1b3441;--land:#1d2c26}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:22px 20px 6px;max-width:1280px;margin:auto}
+h1{margin:0;font-size:34px;font-weight:800;letter-spacing:-.02em}
+header p{margin:4px 0 0;color:var(--mute);max-width:62ch}
+main{max-width:1280px;margin:auto;padding:14px 20px 40px;display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:16px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px;min-width:0}
+h2{margin:0 0 10px;font-size:17px;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+label{display:flex;flex-direction:column;font-size:12px;color:var(--mute);gap:2px}
+input,select,button{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.wide{grid-column:1/-1}
+.chk{flex-direction:row;align-items:center;gap:8px;font-size:13px;color:var(--ink)}
+.chk input{width:auto}
+.stop{display:grid;grid-template-columns:1fr auto;gap:4px 8px;padding:8px 0;border-top:1px solid var(--line)}
+.stop:first-of-type{border-top:0}
+.stop b{font-weight:600}.stop small{color:var(--mute)}
+.stop .ctl{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.stop .ctl input[type=number]{width:70px}
+.x{background:none;border:0;color:var(--berry);cursor:pointer;font-size:18px;line-height:1;padding:2px 6px}
+.add{display:grid;gap:8px;margin-top:10px;padding-top:10px;border-top:2px solid var(--line)}
+.btn{background:var(--pine);color:#fff;border:0;cursor:pointer;font-weight:600;padding:8px 12px}
+:root[data-theme="dark"] .btn{color:#06251a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#06251a}}
+svg{display:block;width:100%;height:auto;max-height:620px}
+.land{fill:var(--land);stroke:var(--line);stroke-width:2}
+.lake{fill:var(--water)}
+.lbl{font-size:12px;fill:var(--mute)}
+.mk{font-size:12px;font-weight:800;fill:#fff;text-anchor:middle}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--mute);margin-top:6px}
+.legend i{display:inline-block;width:18px;height:0;border-top:3px solid var(--pine);vertical-align:middle;margin-right:5px}
+.legend i.d{border-top:2px dashed var(--mute)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.cards{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px}
+.card.best{border:2px solid var(--pine)}
+.card h3{margin:0;font-size:13px;font-weight:600;color:var(--mute)}
+.big{font-size:34px;font-weight:800;letter-spacing:-.02em}
+dl{margin:6px 0 0;display:grid;gap:3px}
+dl div{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:3px}
+dt{color:var(--mute)}dd{margin:0;font-weight:600}
+.ok{color:var(--pine)}.bad{color:var(--berry)}
+.save{background:var(--pine);color:#fff;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-weight:600}
+:root[data-theme="dark"] .save{color:#06251a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .save{color:#06251a}}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--mute);font-weight:600}
+td.n{text-align:right}
+.tag{border-radius:99px;padding:1px 8px;font-size:12px;font-weight:600;border:1px solid currentColor}
+summary{cursor:pointer;font-weight:600}
+.note{color:var(--mute);font-size:12px;margin:8px 0 0}
+.drv{border:1px solid var(--line);border-left:6px solid;border-radius:8px;padding:8px;margin-bottom:8px}
+.dh{display:flex;gap:6px}.dh input{flex:1}
+.chips{display:flex;flex-wrap:wrap;gap:4px 12px;margin:6px 0 4px}
+.chip{flex-direction:row;align-items:center;gap:4px;color:var(--ink);font-size:13px}
+.chip input{width:auto}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+button#auto{cursor:pointer;font-weight:600}
+.save.warn{background:var(--gold);color:#1a1a1a}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%}
+.ih{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Hamper Run</h1>
+  <p>Add your Christmas hamper drop-offs, set deadlines, and get the order of stops that saves fuel and time without missing a deadline.</p>
+</header>
+<main>
+  <section>
+    <div class="box">
+      <h2>Trip settings</h2>
+      <div class="grid">
+        <label class="wide">Depot / start town<select id="depot"></select></label>
+        <label class="wide">Departure<input type="datetime-local" id="depart" value="2026-12-14T06:00"></label>
+        <label>Drive from (hour)<input type="number" id="ws" value="6" min="0" max="23"></label>
+        <label>Drive until (hour)<input type="number" id="we" value="20" min="1" max="24"></label>
+        <label>Avg speed (km/h)<input type="number" id="spd" value="55" min="20" max="110"></label>
+        <label>Minutes per drop-off<input type="number" id="svc" value="25" min="0"></label>
+        <label>Fuel use (L/100 km)<input type="number" id="cons" value="14" min="3" step="0.5"></label>
+        <label>Fuel price (UGX/L)<input type="number" id="price" value="5400" min="1000" step="50"></label>
+        <label class="chk wide"><input type="checkbox" id="ret" checked> Return to depot at the end</label>
+      </div>
+    </div>
+    <div class="box">
+      <h2>Drivers</h2><div id="drivers"></div>
+      <div class="btns"><button class="btn" id="adddrv">Add driver</button><button id="auto">Auto-assign regions</button></div>
+      <p class="note">Tick a region to give it to a driver. Adding a drop-off in a region with no driver creates a new driver for it.</p>
+    </div>
+    <div class="box">
+      <h2>Drop-offs <span id="cnt" style="color:var(--mute);font-weight:400"></span></h2>
+      <div id="stops"></div>
+      <div class="add">
+        <input id="nco" placeholder="Company name" aria-label="Company name">
+        <div class="grid">
+          <label>Town<select id="ntown"></select></label>
+          <label>Hampers<input type="number" id="nh" value="20" min="1"></label>
+          <label class="wide">Deliver by<input type="datetime-local" id="ndl" value="2026-12-20T17:00"></label>
+        </div>
+        <button class="btn" id="addbtn">Add drop-off</button>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="box">
+      <svg id="map" viewBox="0 0 590 600" role="img" aria-label="Schematic map of Uganda with the optimized route"></svg>
+      <div class="legend" id="legend"></div>
+      <p class="note">Schematic map. Distances are straight-line between towns × 1.3 to approximate road distance; replace with a routing API for real road data.</p>
+    </div>
+    <div id="save"></div>
+    <div class="cards" id="cards"></div>
+    <div id="itin"></div>
+    <details class="box"><summary>Distance between locations (km, approx. by road)</summary><div class="tw" id="matrix" style="margin-top:10px"></div></details>
+  </section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const T={Kampala:[0.3476,32.5825],Entebbe:[0.0512,32.4637],Mityana:[0.4167,32.0333],Masaka:[-0.3136,31.7413],Jinja:[0.4244,33.2041],Mbale:[1.0821,34.1751],Tororo:[0.6928,34.181],Soroti:[1.7147,33.6111],Gulu:[2.7746,32.299],Lira:[2.2499,32.8998],Arua:[3.0201,30.911],Mbarara:[-0.6072,30.6545],Kabale:[-1.249,29.9899],'Fort Portal':[0.671,30.275],Kasese:[0.1833,30.0833],Hoima:[1.4331,31.3524]};
+const names=Object.keys(T);
+let nid=12,did=4;
+let stops=[
+ {id:1,company:'Kyoga Dairy Ltd',town:'Soroti',hampers:40,dl:'2026-12-17T17:00'},
+ {id:2,company:'Pearl Agro Ltd',town:'Mbarara',hampers:55,dl:'2026-12-16T17:00'},
+ {id:3,company:'Rwenzori Tea Co',town:'Fort Portal',hampers:30,dl:'2026-12-18T12:00'},
+ {id:4,company:'Nile Logistics',town:'Jinja',hampers:25,dl:'2026-12-15T10:00'},
+ {id:5,company:'Acholi Foods',town:'Gulu',hampers:35,dl:'2026-12-19T17:00'},
+ {id:6,company:'Elgon Coffee',town:'Mbale',hampers:45,dl:'2026-12-17T12:00'},
+ {id:7,company:'Kigezi Traders',town:'Kabale',hampers:20,dl:'2026-12-20T17:00'},
+ {id:8,company:'Masaka Millers',town:'Masaka',hampers:28,dl:'2026-12-16T12:00'},
+ {id:9,company:'Lira Cotton',town:'Lira',hampers:22,dl:'2026-12-18T17:00'},
+ {id:10,company:'Entebbe Air Services',town:'Entebbe',hampers:15,dl:'2026-12-14T15:00'},
+ {id:11,company:'West Nile Hardware',town:'Arua',hampers:18,dl:'2026-12-19T12:00'}
+];
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const f=(n,d=0)=>n.toLocaleString('en-US',{maximumFractionDigits:d});
+const fd=t=>new Date(t).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+
+function hav(a,b){const R=6371,r=Math.PI/180,dl=(b[0]-a[0])*r,dn=(b[1]-a[1])*r;
+ const x=Math.sin(dl/2)**2+Math.cos(a[0]*r)*Math.cos(b[0]*r)*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+const dist=(a,b)=>a===b?3:hav(T[a],T[b])*1.3;
+
+const cfg=()=>({depot:$('#depot').value,dep:new Date($('#depart').value).getTime(),S:+$('#ws').value,E:+$('#we').value,
+ spd:+$('#spd').value||55,cons:+$('#cons').value,price:+$('#price').value,svc:+$('#svc').value,ret:$('#ret').checked});
+
+// advance clock by driveMin minutes, only driving inside the daily window
+function adv(t,m,c){let rem=m,rests=0;
+ while(rem>1e-6){const d=new Date(t),h=d.getHours()+d.getMinutes()/60;
+  if(h<c.S){t+=Math.ceil((c.S-h)*36e5);continue}
+  if(h>=c.E){const n=new Date(t);n.setDate(n.getDate()+1);n.setHours(c.S,0,0,0);t=n.getTime();rests++;continue}
+  const x=Math.min((c.E-h)*60,rem);t+=Math.ceil(x*6e4);rem-=x}
+ return{t,rests}}
+
+function evaluate(order,c){
+ let pos=c.depot,t=c.dep,km=0,rows=[],late=0,lateH=0,rests=0;
+ for(const s of order){
+  const d=dist(pos,s.town);km+=d;
+  const r=adv(t,d/c.spd*60,c);rests+=r.rests;
+  const dl=Date.parse(s.dl),l=Math.max(0,r.t-dl)/36e5;
+  if(l>0){late++;lateH+=l}
+  rows.push({s,d,arr:r.t,dl,l,rests:r.rests});
+  t=r.t+c.svc*6e4;pos=s.town}
+ if(c.ret&&order.length){const d=dist(pos,c.depot);km+=d;const r=adv(t,d/c.spd*60,c);rests+=r.rests;t=r.t}
+ const fuel=km*c.cons/100;
+ return{order,rows,km,late,lateH,rests,end:t,fuel,cost:fuel*c.price,hrs:(t-c.dep)/36e5}}
+// objective: fewest km, with heavy penalty for late drop-offs
+const score=r=>r.km+300*r.late+150*r.lateH;
+
+function optimize(c,stops){
+ const n=stops.length;if(n<2)return evaluate(stops.slice(),c);
+ const sc=o=>score(evaluate(o,c));
+ function improve(o){let best=o,bs=sc(o),again=true;
+  while(again){again=false;
+   for(let i=0;i<n-1;i++)for(let j=i+1;j<n;j++){
+    const cand=best.slice(0,i).concat(best.slice(i,j+1).reverse(),best.slice(j+1)),s=sc(cand);
+    if(s<bs-1e-6){best=cand;bs=s;again=true}}
+   for(let i=0;i<n;i++)for(let j=0;j<n;j++){if(i===j)continue;
+    const cand=best.slice(),[x]=cand.splice(i,1);cand.splice(j,0,x);const s=sc(cand);
+    if(s<bs-1e-6){best=cand;bs=s;again=true}}}
+  return best}
+ const nn=()=>{let pos=c.depot,rem=stops.slice(),o=[];
+  while(rem.length){rem.sort((a,b)=>dist(pos,a.town)-dist(pos,b.town));const s=rem.shift();o.push(s);pos=s.town}return o};
+ const starts=[nn(),stops.slice(),stops.slice().sort((a,b)=>Date.parse(a.dl)-Date.parse(b.dl))];
+ for(let k=0;k<20;k++)starts.push(stops.slice().sort(()=>Math.random()-.5));
+ let best=null,bs=Infinity;
+ for(const s of starts){const o=improve(s),v=sc(o);if(v<bs){bs=v;best=o}}
+ return evaluate(best,c)}
+
+const px=p=>[(p[1]-29.3)*100,(4.4-p[0])*100];
+const poly=pts=>pts.map(p=>px([p[1],p[0]]).join(',')).join(' ');
+const UG=[[29.58,-1.39],[30.47,-1.06],[31,-1],[33,-1],[33.9,0.1],[34.1,0.4],[34,1],[34.45,1.2],[34.3,1.7],[34.4,2.3],[33.95,2.9],[33.95,3.6],[34.4,3.85],[34,4.25],[33.5,3.8],[32.9,3.8],[32.2,3.55],[31.5,3.65],[31.2,3.75],[30.9,3.5],[30.85,2.85],[31.2,2.25],[30.5,1.65],[30.25,1.1],[29.9,0.85],[29.6,0.2],[29.8,-0.2],[29.6,-0.9]];
+const LAKE=[[31.7,-1],[31.75,-0.3],[32.3,0.15],[33,0.1],[33.9,0.1],[33.3,-0.6],[33,-1]];
+
+const REG={Kampala:'Central',Entebbe:'Central',Mityana:'Central',Masaka:'Central',Jinja:'Eastern',Mbale:'Eastern',Tororo:'Eastern',Soroti:'Eastern',Gulu:'Northern',Lira:'Northern',Arua:'West Nile',Mbarara:'Western',Kabale:'Western','Fort Portal':'Western',Kasese:'Western',Hoima:'Western'};
+const REGIONS=['Central','Eastern','Northern','West Nile','Western'];
+const COLS=['#1f7a5a','#2f6fd0','#c2570c','#8a3fc0','#0e8fa0','#b8336a'];
+let drivers=[{id:1,name:'Driver 1',regions:['Central','Eastern'],col:0},{id:2,name:'Driver 2',regions:['Western'],col:1},{id:3,name:'Driver 3',regions:['Northern','West Nile'],col:2}];
+const driverOf=t=>drivers.find(d=>d.regions.includes(REG[t]));
+const stopsOf=d=>stops.filter(s=>driverOf(s.town)===d);
+function newDriver(regs){const d={id:did,name:'Driver '+did,regions:regs||[],col:(did-1)%COLS.length};did++;drivers.push(d);return d}
+function assign(d,r){drivers.forEach(x=>x.regions=x.regions.filter(y=>y!==r));if(d)d.regions.push(r)}
+function autoAssign(){ // spread regions with stops across drivers, balancing hamper load
+ if(!drivers.length)newDriver();
+ drivers.forEach(d=>d.regions=[]);
+ const load={};REGIONS.forEach(r=>load[r]=0);stops.forEach(s=>load[REG[s.town]]+=s.hampers);
+ const L=new Map(drivers.map(d=>[d,0]));
+ REGIONS.filter(r=>load[r]>0).sort((a,b)=>load[b]-load[a]).forEach(r=>{
+  let best=drivers[0];for(const d of drivers)if(L.get(d)<L.get(best))best=d;
+  best.regions.push(r);L.set(best,L.get(best)+load[r])})}
+
+function drawMap(plans,un,c){
+ let h=`<polygon class="land" points="${poly(UG)}"/><polygon class="lake" points="${poly(LAKE)}"/>`;
+ const [lx,ly]=px([-0.45,32.5]);h+=`<text class="lbl" x="${lx}" y="${ly}" font-style="italic">Lake Victoria</text>`;
+ plans.forEach(p=>{const pts=[c.depot,...p.r.order.map(s=>s.town)];if(c.ret)pts.push(c.depot);
+  h+=`<polyline points="${pts.map(t=>px(T[t]).join(',')).join(' ')}" fill="none" stroke="${COLS[p.d.col]}" stroke-width="3.5" stroke-linejoin="round" opacity=".9"/>`});
+ const [dx,dy]=px(T[c.depot]);
+ h+=`<rect x="${dx-8}" y="${dy-8}" width="16" height="16" fill="var(--gold)" stroke="var(--ink)" stroke-width="1.5"/><text class="lbl" x="${dx+12}" y="${dy+18}" style="font-weight:700;fill:var(--ink)">${c.depot} (depot)</text>`;
+ plans.forEach(p=>p.r.rows.forEach((r,i)=>{const [x,y]=px(T[r.s.town]);
+  h+=`<circle cx="${x}" cy="${y}" r="11" fill="${COLS[p.d.col]}" ${r.l>0?'stroke="var(--berry)" stroke-width="4"':''}/><text class="mk" x="${x}" y="${y+4}">${i+1}</text><text class="lbl" x="${x+15}" y="${y+4}">${r.s.town}</text>`}));
+ un.forEach(s=>{const [x,y]=px(T[s.town]);
+  h+=`<circle cx="${x}" cy="${y}" r="11" fill="var(--panel)" stroke="var(--mute)" stroke-width="2" stroke-dasharray="3 3"/><text class="lbl" x="${x}" y="${y+4}" text-anchor="middle">?</text><text class="lbl" x="${x+15}" y="${y+4}">${s.town}</text>`});
+ $('#map').innerHTML=h;
+ $('#legend').innerHTML=plans.map(p=>`<span><i style="border-top-color:${COLS[p.d.col]}"></i>${esc(p.d.name)}</span>`).join('')+'<span style="color:var(--berry)">red ring = late drop-off</span>'+(un.length?'<span>dashed ? = no driver</span>':'')}
+
+function card(t,r,cls,tl){return `<div class="card ${cls}"><h3>${t}</h3><div class="big">${f(r.km)} km</div><dl>
+ <div><dt>Fuel</dt><dd>${f(r.fuel,1)} L</dd></div><div><dt>Fuel cost</dt><dd>UGX ${f(r.cost)}</dd></div>
+ <div><dt>${tl}</dt><dd>${f(r.hrs,1)} h</dd></div><div><dt>Overnight stops</dt><dd>${r.rests}</dd></div>
+ <div><dt>Late drop-offs</dt><dd class="${r.late?'bad':'ok'}">${r.late}</dd></div></dl></div>`}
+
+const rowsHtml=r=>r.rows.map((x,i)=>{const sl=(x.dl-x.arr)/36e5;
+ const st=x.l>0?`<span class="tag bad">${f(x.l,1)} h late</span>`:`<span class="tag ok">${f(sl,1)} h to spare</span>`;
+ return `<tr><td>${i+1}</td><td><b>${esc(x.s.company)}</b><br><small style="color:var(--mute)">${x.s.town} · ${x.s.hampers} hampers</small></td><td class="n">${f(x.d)}</td><td>${fd(x.arr)}${x.rests?' <small style="color:var(--mute)">(after overnight rest)</small>':''}</td><td>${fd(x.dl)}</td><td>${st}</td></tr>`}).join('');
+
+function render(){
+ const c=cfg();
+ $('#cnt').textContent=`(${stops.length} stops · ${f(stops.reduce((a,s)=>a+s.hampers,0))} hampers)`;
+ $('#drivers').innerHTML=drivers.map(d=>{const l=stopsOf(d);
+  return `<div class="drv" data-id="${d.id}" style="border-left-color:${COLS[d.col]}"><div class="dh"><input value="${esc(d.name)}" data-name aria-label="Driver name"><button class="x" data-rmd aria-label="Remove ${esc(d.name)}">×</button></div>
+  <div class="chips">${REGIONS.map(r=>`<label class="chip"><input type="checkbox" data-reg="${r}" ${d.regions.includes(r)?'checked':''}>${r}</label>`).join('')}</div>
+  <small style="color:var(--mute)">${l.length} stops · ${f(l.reduce((a,s)=>a+s.hampers,0))} hampers</small></div>`}).join('')||'<p class="note">No drivers yet. Add one, or add a drop-off to create one.</p>';
+ $('#stops').innerHTML=stops.map(s=>{const d=driverOf(s.town);
+  return `<div class="stop" data-id="${s.id}"><div><b>${esc(s.company)}</b><br><small>${s.town} · ${REG[s.town]} · ${d?`<span style="color:${COLS[d.col]}">●</span> ${esc(d.name)}`:'<span class="bad">no driver</span>'}</small></div>
+  <button class="x" data-rm="${s.id}" aria-label="Remove ${esc(s.company)}">×</button>
+  <div class="ctl"><input type="number" min="1" value="${s.hampers}" data-f="hampers" aria-label="Hampers"><input type="datetime-local" value="${s.dl}" data-f="dl" aria-label="Deadline"></div></div>`}).join('')||'<p class="note">No drop-offs yet. Add one below.</p>';
+ const un=stops.filter(s=>!driverOf(s.town)),assigned=stops.filter(s=>driverOf(s.town));
+ const plans=drivers.map(d=>({d,list:stopsOf(d)})).filter(p=>p.list.length).map(p=>({...p,r:optimize(c,p.list)}));
+ drawMap(plans,un,c);
+ const warn=un.length?`<div class="save warn">${un.length} drop-off${un.length>1?'s have':' has'} no driver (${[...new Set(un.map(s=>REG[s.town]))].join(', ')}). Tick the region on a driver, or press Auto-assign.</div>`:'';
+ if(!plans.length){$('#save').innerHTML=warn;['#cards','#itin','#matrix'].forEach(s=>$(s).innerHTML='');return}
+ const one=optimize(c,assigned),sum=k=>plans.reduce((a,p)=>a+p.r[k],0);
+ const fleet={km:sum('km'),fuel:sum('fuel'),cost:sum('cost'),late:sum('late'),rests:sum('rests'),hrs:Math.max(...plans.map(p=>p.r.hrs))};
+ const dk=fleet.km-one.km,dc=fleet.cost-one.cost;
+ let msg=`${plans.length} driver${plans.length>1?'s':''} finish${plans.length>1?'':'es'} ${f(one.hrs-fleet.hrs,1)} h sooner than one driver doing everything, with ${f(Math.abs(dk))} km ${dk>=0?'more':'less'} in total (UGX ${f(Math.abs(dc))} ${dc>=0?'more':'less'} fuel)`;
+ if(one.late>fleet.late)msg+=` and ${one.late-fleet.late} fewer late drop-off${one.late-fleet.late>1?'s':''}`;
+ if(fleet.late)msg+=`. ${fleet.late} stop${fleet.late>1?'s are':' is'} still late: add a driver or move a region to a lighter route`;
+ $('#save').innerHTML=`<div class="save">${msg}.</div>`+warn;
+ $('#cards').innerHTML=card('One driver, all stops',one,'','Trip time')+card(`Your team (${plans.length})`,fleet,'best','Longest trip');
+ $('#itin').innerHTML=plans.map(p=>{const r=p.r;
+  return `<div class="box"><div class="ih"><h2 style="margin:0"><span class="dot" style="background:${COLS[p.d.col]}"></span> ${esc(p.d.name)}</h2><small style="color:var(--mute)">${p.d.regions.join(' + ')} · ${f(r.km)} km · ${f(r.fuel,1)} L · UGX ${f(r.cost)} · ${f(r.hrs,1)} h</small></div>
+  <div class="tw"><table><tr><th>#</th><th>Drop-off</th><th>Leg km</th><th>Arrive</th><th>Deadline</th><th>Status</th></tr>${rowsHtml(r)}</table></div>
+  <p class="note">Leaves ${c.depot} ${fd(c.dep)}. ${c.ret?`Back at depot ${fd(r.end)}.`:`Last drop-off ${fd(r.end-c.svc*6e4)}.`} Driving ${c.S}:00 to ${c.E}:00 only.</p></div>`}).join('');
+ const ts=[c.depot,...new Set(stops.map(s=>s.town).filter(t=>t!==c.depot))];
+ $('#matrix').innerHTML=`<table><tr><th></th>${ts.map(t=>`<th>${t}</th>`).join('')}</tr>${ts.map(a=>`<tr><th>${a}</th>${ts.map(b=>`<td class="n">${a===b?'–':f(dist(a,b))}</td>`).join('')}</tr>`).join('')}</table>`}
+
+// setup
+const opts=names.map(n=>`<option>${n}</option>`).join('');
+$('#depot').innerHTML=opts;$('#ntown').innerHTML=opts;$('#ntown').value='Hoima';
+document.querySelectorAll('.box input:not(#nco):not(#nh):not(#ndl),#depot').forEach(e=>e.addEventListener('input',render));
+$('#depot').addEventListener('change',render);
+$('#addbtn').onclick=()=>{const co=$('#nco').value.trim();if(!co){$('#nco').focus();return}
+ const town=$('#ntown').value;
+ if(!driverOf(town))newDriver([REG[town]]); // new region -> new driver
+ stops.push({id:nid++,company:co,town,hampers:+$('#nh').value||1,dl:$('#ndl').value||'2026-12-20T17:00'});
+ $('#nco').value='';render()};
+$('#adddrv').onclick=()=>{newDriver();render()};
+$('#auto').onclick=()=>{autoAssign();render()};
+$('#drivers').addEventListener('change',e=>{const row=e.target.closest('.drv');if(!row)return;
+ const d=drivers.find(x=>x.id==row.dataset.id);
+ if(e.target.dataset.reg)assign(e.target.checked?d:null,e.target.dataset.reg);
+ else if('name' in e.target.dataset)d.name=e.target.value.trim()||d.name;
+ render()});
+$('#drivers').addEventListener('click',e=>{if('rmd' in e.target.dataset){drivers=drivers.filter(x=>x.id!=e.target.closest('.drv').dataset.id);render()}});
+$('#stops').addEventListener('click',e=>{const id=e.target.dataset.rm;if(id){stops=stops.filter(s=>s.id!=id);render()}});
+$('#stops').addEventListener('change',e=>{const row=e.target.closest('.stop');if(!row||!e.target.dataset.f)return;
+ const s=stops.find(x=>x.id==row.dataset.id);s[e.target.dataset.f]=e.target.dataset.f==='hampers'?(+e.target.value||1):e.target.value;render()});
+render();
+</script>
+</body>
+</html>
